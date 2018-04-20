@@ -1,15 +1,13 @@
 // @flow
 import { compose } from 'recompose'
 import { values, omit } from 'lodash'
-import { withData, withActions } from 'spunky'
+import { withActions } from 'spunky'
 
 import AssetBalancesPanel from './AssetBalancesPanel'
-import pricesActions from '../../../actions/pricesActions'
 import balancesActions from '../../../actions/balancesActions'
-import withNetworkData from '../../../hocs/withNetworkData'
-import withAuthData from '../../../hocs/withAuthData'
+import withBalancesData from '../../../hocs/withBalancesData'
 import withCurrencyData from '../../../hocs/withCurrencyData'
-import withFilteredTokensData from '../../../hocs/withFilteredTokensData'
+import withPricesData from '../../../hocs/withPricesData'
 import withSuccessNotification from '../../../hocs/withSuccessNotification'
 import withFailureNotification from '../../../hocs/withFailureNotification'
 
@@ -29,14 +27,15 @@ const mapBalancesActionsToProps = (actions, props) => ({
 })
 
 export default compose(
-  withData(pricesActions, mapPricesDataToProps),
-  withData(balancesActions, mapBalanceDataToProps),
   withCurrencyData('currencyCode'),
 
-  // expose data & functionality needed for `refresh` action
-  withNetworkData(),
-  withAuthData(),
-  withFilteredTokensData(),
+  // Fetch prices data based based upon the selected currency.  Reload data with the currency changes.
+  withPricesData(mapPricesDataToProps),
+
+  // Fetch balances data based based upon the selected network.  Reload data with the network changes.
+  withBalancesData(mapBalanceDataToProps),
+
+  // Expose data & functionality needed for `refresh` action.
   withActions(balancesActions, mapBalancesActionsToProps),
   withSuccessNotification(balancesActions, 'Received latest blockchain information.'),
   withFailureNotification(balancesActions, 'Failed to retrieve blockchain information.')
